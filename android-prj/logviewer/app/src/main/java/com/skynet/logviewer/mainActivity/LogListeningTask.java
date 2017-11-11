@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.net.wifi.WifiManager;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -138,7 +137,7 @@ public class LogListeningTask extends BaseMainActivityComponent{
         System.arraycopy(buf, 0, recvedBytes, 0, recv.getLength());
         byte[] decodeBytes = codec(recvedBytes);
         String message = new String(decodeBytes);
-        Log.i("REV_LOG", message);
+//        Log.i("REV_LOG", message);
         if (message.indexOf(filterString) < 0){
             mainActivity.incFiltered();
             return;
@@ -159,6 +158,7 @@ public class LogListeningTask extends BaseMainActivityComponent{
     }
 
     public void stop() {
+        isRunning = false;
         udpListeningThread.interrupt();
         try {
             udpListeningThread.join();

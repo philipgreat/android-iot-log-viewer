@@ -1,6 +1,7 @@
 package com.skynet.logviewer.mainActivity;
 
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -44,20 +45,19 @@ public class LogDisplayer extends BaseMainActivityComponent{
         txtLabel.setText("0");
     }
 
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        mainActivity.appendContent(String.format("beforeTextChanged(%s,%d,%d,%d)", s, start, count, after));
-    }
 
     public void appendContent(String message) {
         if (!message.endsWith("\n")){
             message = message +"\n";
         }
         sbContent.append(message);
+        boolean renewContent = false;
         if (sbContent.length() > MAX_CONTENT_LENGTH){
             int charsNeedRemove = sbContent.length() - MAX_CONTENT_LENGTH;
             int canRemovedChars = findCharsCanRemoved(sbContent, charsNeedRemove);
             if (canRemovedChars > 0){
                 sbContent.delete(0, canRemovedChars);
+                renewContent = true;
 //                txtViewLogContent.setText(sbContent.toString());
             }else{
 //                txtViewLogContent.append(message);
@@ -67,15 +67,23 @@ public class LogDisplayer extends BaseMainActivityComponent{
         }
 //        System.out.println(sbContent.toString());
 
+        final boolean newContent = renewContent;
+        final String newMessage = message;
         mainActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                txtViewLogContent.setText(sbContent.toString());
+                if (newContent) {
+                    txtViewLogContent.setText(sbContent.toString());
+                }else{
+                    txtViewLogContent.append(newMessage);
+                }
                 if (!checkBoxAutoScroll.isChecked()){
                     return;
                 }
                 int offset=txtViewLogContent.getLineCount()*txtViewLogContent.getLineHeight();
                 if(offset>txtViewLogContent.getHeight()){
+                    Log.i("SCROLL","offset " + offset +", content " + txtViewLogContent.getLineCount()+"x"+txtViewLogContent.getLineHeight()+", height " + txtViewLogContent.getHeight());
+                    Log.i("SCROLL","scroll to " + (offset-txtViewLogContent.getHeight()));
                     txtViewLogContent.scrollTo(0,offset-txtViewLogContent.getHeight());
                 }
             }
